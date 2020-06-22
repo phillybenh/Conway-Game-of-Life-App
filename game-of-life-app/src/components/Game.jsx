@@ -47,10 +47,12 @@ const Grid = (props) => {
     </div>
   );
 };
-
+const Buttons = (props) => {
+  return <div></div>;
+};
 const GameOfLife = () => {
   const [generation, setGeneration] = useState(0);
-  const [speed, setSpeed] = useState(10);
+  const [speed, setSpeed] = useState(1000);
   const [rows, setRowsd] = useState(30);
   const [cols, setCols] = useState(50);
   const [gridFull, setGridFull] = useState(
@@ -60,6 +62,7 @@ const GameOfLife = () => {
         return Array(cols).fill(false);
       })
   );
+
   // allows you to select a box to toggle it's state
   const selectBox = (row, col) => {
     const gridCopy = arrayClone(gridFull);
@@ -80,16 +83,67 @@ const GameOfLife = () => {
     setGridFull(gridCopy);
   };
 
+  var intervalId;
+
+  const playButton = () => {
+    // clearInterval(intervalId);
+    // intervalId = setInterval(play(), speed);
+  };
+
+  const pauseButton = () => {
+    clearInterval(intervalId);
+  };
+
+  const play = () => {
+    let grid = gridFull;
+    let gridCopy = arrayClone(gridFull);
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        let count = 0;
+        if (i > 0) if (grid[i - 1][j]) count++;
+        if (i > 0 && j > 0) if (grid[i - 1][j - 1]) count++;
+        if (i > 0 && j < cols - 1) if (grid[i - 1][j + 1]) count++;
+        if (j < cols - 1) if (grid[i][j + 1]) count++;
+        if (j > 0) if (grid[i][j - 1]) count++;
+        if (i < rows - 1) if (grid[i + 1][j]) count++;
+        if (i < rows - 1 && j > 0) if (grid[i + 1][j - 1]) count++;
+        if (i < rows - 1 && j < cols - 1) if (grid[i + 1][j + 1]) count++;
+        if (grid[i][j] && (count < 2 || count > 3)) gridCopy[i][j] = false;
+        if (!grid[i][j] && count === 3) gridCopy[i][j] = true;
+      }
+    }
+    setGridFull(gridCopy);
+    setGeneration(generation + 1);
+  };
+
+  // initialize grid w/ random live cells
   useEffect(() => {
     randomSeed();
   }, []);
+
+//   useEffect(() => {
+//     const intervalId = setInterval(() => {
+//       play();
+//     }, speed);
+
+//     return () => clearInterval(intervalId);
+//   });
 
   return (
     <div>
       <h2>Game</h2>
       <Grid gridFull={gridFull} rows={rows} cols={cols} selectBox={selectBox} />
-
-      <Controls />
+      {/* <Buttons
+        playButton={this.playButton}
+        pauseButton={this.pauseButton}
+        slow={this.slow}
+        fast={this.fast}
+        clear={this.clear}
+        seed={this.seed}
+        gridSize={this.gridSize}
+      />
+      <Controls /> */}
       <h3>Generations: {generation}</h3>
     </div>
   );
