@@ -7,7 +7,7 @@ import {
 } from "react-bootstrap";
 
 //import sub-components
-import Controls from "./Controls";
+import Controls from "./game/Controls";
 
 // import styles
 import "./Game.css";

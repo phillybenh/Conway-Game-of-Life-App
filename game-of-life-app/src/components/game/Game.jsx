@@ -4,6 +4,7 @@ import produce from "immer";
 // components
 import Grid from "./Grid";
 import Controls from "./Controls";
+import { blinker, spaceFleet, gliderGun } from './SampleConfigs'
 
 // styles
 import { Button, Dropdown, DropdownButton } from "react-bootstrap";
@@ -21,6 +22,10 @@ const operations = [
   [1, 0],
   [-1, 0],
 ];
+
+function arrayClone(arr) {
+  return arr.map((array) => array.slice());
+}
 
 const GameOfLife = () => {
   const [numRows, setNumRows] = useState(30);
@@ -56,6 +61,8 @@ const GameOfLife = () => {
     if (!playingRef.current) {
       return;
     }
+    // let gridTest = arrayClone(grid)
+
     const grid2 = (g) => {
       return produce(g, gridCopy => {
         generation += 1;
@@ -104,10 +111,12 @@ const GameOfLife = () => {
         )
       );
     }
-    setGrid(rows);
+    setGrid(gliderGun);
   };
 
   const reset = () => {
+    console.log(grid);
+
     if (playing) {
       playStop();
     }
@@ -155,3 +164,5 @@ const GameOfLife = () => {
 };
 
 export default GameOfLife;
+
+
