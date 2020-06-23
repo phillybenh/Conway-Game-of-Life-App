@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
 
+// components
+import Grid from "./Grid";
+import Controls from "./Controls";
+
 // styles
 import { Button, Dropdown, DropdownButton } from "react-bootstrap";
 import "./Game.css";
 
-const numRows = 35;
-const numCols = 50;
 let generation = 0;
 
 const operations = [
@@ -19,33 +21,10 @@ const operations = [
   [1, 0],
   [-1, 0],
 ];
-const Controls = (props) => {
-  return (
-    <div className="buttons">
-      <Button variant="primary" onClick={props.playStop}>
-        {props.playing ? "Stop" : "Start"}
-      </Button>
-      <Button variant="primary" onClick={props.randomSeed}>
-        Random Seed
-      </Button>
-      <Button variant="primary" onClick={props.reset}>
-        Reset
-      </Button>
-      <DropdownButton
-        title="Speed"
-        id="speed-menu"
-        onSelect={props.changeSpeed}
-      >
-        <Dropdown.Item eventKey="1">250ms</Dropdown.Item>
-        <Dropdown.Item eventKey="2">500ms</Dropdown.Item>
-        <Dropdown.Item eventKey="3">1000ms</Dropdown.Item>
-      </DropdownButton>
-    </div>
-  );
-};
+
 const GameOfLife = () => {
-  // const [numRows, setNumRows] = useState(50);
-  // const [numCols, setNumCols] = useState(50);
+  const [numRows, setNumRows] = useState(30);
+  const [numCols, setNumCols] = useState(50);
 
   const [grid, setGrid] = useState(() => {
     const rows = [];
@@ -71,15 +50,14 @@ const GameOfLife = () => {
     for (let i = 0; i < numRows; i++) {
       rows.push(Array.from(Array(numCols), () => 0));
     }
-
     return rows;
   };
   const runSimulation = useCallback(() => {
     if (!playingRef.current) {
       return;
     }
-    setGrid((g) => {
-      return produce(g, (gridCopy) => {
+    const grid2 = (g) => {
+      return produce(g, gridCopy => {
         generation += 1;
 
         for (let i = 0; i < numRows; i++) {
@@ -101,10 +79,12 @@ const GameOfLife = () => {
           }
         }
       });
-    });
+    };
+    setGrid(grid2);
     setTimeout(runSimulation, speed);
   }, []);
 
+  // funtion to play/stop the game
   const playStop = () => {
     setPlaying(!playing);
     if (!playing) {
@@ -112,6 +92,8 @@ const GameOfLife = () => {
       runSimulation();
     }
   };
+
+  // function to randomly seed the grid
   const randomSeed = () => {
     const rows = [];
     for (let i = 0; i < numRows; i++) {
@@ -126,6 +108,9 @@ const GameOfLife = () => {
   };
 
   const reset = () => {
+    if (playing) {
+      playStop();
+    }
     setGrid(generateEmptyGrid());
     generation = 0;
   };
@@ -134,7 +119,7 @@ const GameOfLife = () => {
     switch (speed) {
       case "1":
         setSpeed(250);
-        console.log("speed!")
+        console.log("speed!");
         break;
       case "2":
         setSpeed(500);
@@ -145,41 +130,19 @@ const GameOfLife = () => {
     setGrid(generateEmptyGrid());
     reset();
   };
+
   const changeSpeed = (e) => {
     playSpeed(e);
   };
 
   return (
     <div className="center">
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${numCols}, 20px)`,
-          margin: "15px 0px",
-        }}
-      >
-        {grid.map((rows, i) =>
-          rows.map((col, k) => (
-            <div
-              key={`${i}-${k}`}
-              onClick={() => {
-                const newGrid = produce(grid, (gridCopy) => {
-                  gridCopy[i][k] = grid[i][k] ? 0 : 1;
-                });
-                setGrid(newGrid);
-              }}
-              style={{
-                width: 20,
-                height: 20,
-                backgroundColor: grid[i][k] ? "red" : undefined,
-                border: "solid 1px black",
-              }}
-            />
-          ))
-        )}
-      </div>
-      <h3>Generation: {generation}</h3>
-
+      <Grid
+        grid={grid}
+        setGrid={setGrid}
+        generation={generation}
+        numCols={numCols}
+      />
       <Controls
         playStop={playStop}
         playing={playing}
