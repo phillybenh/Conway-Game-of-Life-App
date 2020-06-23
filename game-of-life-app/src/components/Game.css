@@ -24,8 +24,11 @@ body {
 }
 
 .center {
+  width: 600px;
   margin: auto;
-  display: table;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
   margin-top: 10px;
 }
 

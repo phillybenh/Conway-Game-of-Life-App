@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import {
+  ButtonToolbar,
+  Button,
+  Dropdown,
+  DropdownButton,
+} from "react-bootstrap";
 
 //import sub-components
 import Controls from "./Controls";
@@ -48,12 +54,51 @@ const Grid = (props) => {
   );
 };
 const Buttons = (props) => {
-  return <div></div>;
+  const handleSelect = (evt) => {
+    props.gridSize(evt);
+  };
+  return (
+    <div className="center">
+      {/* <ButtonToolbar> */}
+      <Button
+        variant="primary"
+        class="btn-space"
+        onClick={(e) => {
+          e.preventDefault();
+          props.playButton();
+        }}
+      >
+        {props.playing ? "Stop" : "Start"}{" "}
+      </Button>
+      {/* <Button variant="primary" onClick={props.pauseButton}>
+        Pause
+      </Button> */}
+      <Button variant="primary" onClick={props.clear}>
+        Clear
+      </Button>
+      <Button variant="primary" onClick={props.slow}>
+        Slow
+      </Button>
+      <Button variant="primary" onClick={props.fast}>
+        Fast
+      </Button>
+      <Button variant="primary" onClick={props.seed}>
+        Seed
+      </Button>
+      <DropdownButton title="Grid Size" id="size-menu" onSelect={handleSelect}>
+        <Dropdown.Item eventKey="1">25x15</Dropdown.Item>
+        <Dropdown.Item eventKey="2">50x30</Dropdown.Item>
+        <Dropdown.Item eventKey="3">100x60</Dropdown.Item>
+      </DropdownButton>
+
+      {/* </ButtonToolbar> */}
+    </div>
+  );
 };
 const GameOfLife = () => {
   const [generation, setGeneration] = useState(0);
   const [speed, setSpeed] = useState(1000);
-  const [rows, setRowsd] = useState(30);
+  const [rows, setRows] = useState(30);
   const [cols, setCols] = useState(50);
   const [gridFull, setGridFull] = useState(
     Array(rows)
@@ -62,6 +107,10 @@ const GameOfLife = () => {
         return Array(cols).fill(false);
       })
   );
+
+  const [playing, setPlaying] = useState(false);
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
 
   // allows you to select a box to toggle it's state
   const selectBox = (row, col) => {
@@ -86,119 +135,131 @@ const GameOfLife = () => {
   var intervalId;
 
   const playButton = () => {
+    console.log("play");
+    // this doesn't work w/ fcn components
+    //
     // clearInterval(intervalId);
     // intervalId = setInterval(play(), speed);
+    setPlaying(!playing);
+    if (!playing) {
+      playingRef.current = true;
+      play();
+    }
   };
 
-  const pauseButton = () => {
-    clearInterval(intervalId);
+  // const pauseButton = () => {
+  //   // handled in useEffect below
+  //   // clearInterval(intervalId);
+  //   setPlaying(false);
+  // };
+
+  const slow = () => {
+    setSpeed(1000);
+    playButton();
   };
 
-  const play = () => {
-    let grid = gridFull;
-    let gridCopy = arrayClone(gridFull);
+  const fast = () => {
+    setSpeed(100);
+    playButton();
+  };
+
+  const clear = () => {
+    var grid = Array(rows)
+      .fill()
+      .map(() => Array(cols).fill(false));
+    // setState({
+    //   gridFull: grid,
+    //   generation: 0,
+    // });
+    setGeneration(0);
+    setGridFull(grid);
+  };
+
+  const gridSize = (size) => {
+    switch (size) {
+      case "1":
+        setCols(25);
+        setRows(15);
+        break;
+      case "2":
+        setCols(50);
+        setRows(30);
+        break;
+      default:
+        setCols(100);
+        setRows(60);
+    }
+    clear();
+  };
+
+  const play = useCallback(() => {
+    if (!playingRef) {
+      return;
+    }
+    let g = gridFull;
+    let g2 = arrayClone(gridFull);
 
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
         let count = 0;
-        if (i > 0) if (grid[i - 1][j]) count++;
-        if (i > 0 && j > 0) if (grid[i - 1][j - 1]) count++;
-        if (i > 0 && j < cols - 1) if (grid[i - 1][j + 1]) count++;
-        if (j < cols - 1) if (grid[i][j + 1]) count++;
-        if (j > 0) if (grid[i][j - 1]) count++;
-        if (i < rows - 1) if (grid[i + 1][j]) count++;
-        if (i < rows - 1 && j > 0) if (grid[i + 1][j - 1]) count++;
-        if (i < rows - 1 && j < cols - 1) if (grid[i + 1][j + 1]) count++;
-        if (grid[i][j] && (count < 2 || count > 3)) gridCopy[i][j] = false;
-        if (!grid[i][j] && count === 3) gridCopy[i][j] = true;
+        if (i > 0) if (g[i - 1][j]) count++;
+        if (i > 0 && j > 0) if (g[i - 1][j - 1]) count++;
+        if (i > 0 && j < cols - 1) if (g[i - 1][j + 1]) count++;
+        if (j < cols - 1) if (g[i][j + 1]) count++;
+        if (j > 0) if (g[i][j - 1]) count++;
+        if (i < rows - 1) if (g[i + 1][j]) count++;
+        if (i < rows - 1 && j > 0) if (g[i + 1][j - 1]) count++;
+        if (i < rows - 1 && j < cols - 1) if (g[i + 1][j + 1]) count++;
+        if (g[i][j] && (count < 2 || count > 3)) g2[i][j] = false;
+        if (!g[i][j] && count === 3) g2[i][j] = true;
       }
     }
-    setGridFull(gridCopy);
+    setGridFull(g2);
     setGeneration(generation + 1);
-  };
+
+    setTimeout(play, speed);
+  }, []);
 
   // initialize grid w/ random live cells
   useEffect(() => {
     randomSeed();
   }, []);
 
-//   useEffect(() => {
-//     const intervalId = setInterval(() => {
-//       play();
-//     }, speed);
-
-//     return () => clearInterval(intervalId);
-//   });
+  useEffect(() => {
+    let intervalId = null;
+    if (playing) {
+      intervalId = setInterval(() => {
+        play();
+      }, speed);
+    } else if (!playing) {
+      clearInterval(intervalId);
+    } else {
+      return () => clearInterval(intervalId);
+    }
+  }, [playing]);
 
   return (
     <div>
       <h2>Game</h2>
+
       <Grid gridFull={gridFull} rows={rows} cols={cols} selectBox={selectBox} />
-      {/* <Buttons
-        playButton={this.playButton}
-        pauseButton={this.pauseButton}
-        slow={this.slow}
-        fast={this.fast}
-        clear={this.clear}
-        seed={this.seed}
-        gridSize={this.gridSize}
+      <Buttons
+        playButton={playButton}
+        playing={playing}
+        // pauseButton={pauseButton}
+        slow={slow}
+        fast={fast}
+        clear={clear}
+        seed={randomSeed}
+        gridSize={gridSize}
       />
-      <Controls /> */}
+      <Controls />
       <h3>Generations: {generation}</h3>
     </div>
   );
 };
 
 function arrayClone(arr) {
-  return JSON.parse(JSON.stringify(arr));
+  return arr.map((array) => array.slice());
 }
 export default GameOfLife;
-
-/*
-import React, {useEffect, useState} from 'react';
-
-//import sub-components
-import Controls from './Controls';
-
- 
-export default function GameOfLife () {
-    // function draw() {
-    //   var canvas = document.getElementById("canvas");
-    //   if (canvas.getContext) {
-    //     var ctx = canvas.getContext("2d");
-
-    //     ctx.fillRect(25, 25, 100, 100);
-    //     ctx.clearRect(45, 45, 60, 60);
-    //     ctx.strokeRect(50, 50, 50, 50);
-    //   }
-    // }
-    function draw() {
-      var ctx = document.getElementById("canvas").getContext("2d");
-      for (var i = 0; i < 6; i++) {
-        for (var j = 0; j < 6; j++) {
-          ctx.fillStyle =
-            "rgb(" +
-            Math.floor(255 - 42.5 * i) +
-            ", " +
-            Math.floor(255 - 42.5 * j) +
-            ", 0)";
-          ctx.fillRect(j * 25, i * 25, 25, 25);
-        }
-      }
-    }
-    useEffect(() => {draw()}, [])
-    return (
-      <div>
-        <canvas
-          id="canvas"
-          width="200"
-          height="200"
-        ></canvas>
-        <p>Game</p>
-        <Controls />
-      </div>
-    );
-    
-    
-}
-*/
