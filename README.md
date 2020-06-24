@@ -1,5 +1,8 @@
 # Conway-Game-of-Life-App
-I'll be using this repo in order to impliment Conway's Game of Life as a React app. 
+I'll be using this repo in order to impliment Conway's Game of Life as a React app.
+
+## Deployment
+The app has been deployed to: [https://conway-game-of-life-app.vercel.app/](https://conway-game-of-life-app.vercel.app/)
 
 ## Background
 John Conway devised the Game of Life in 1970. THe game requires no input after the initial state is set. 

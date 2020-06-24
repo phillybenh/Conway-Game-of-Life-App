@@ -66,11 +66,8 @@ const GameOfLife = () => {
     if (!playingRef.current) {
       return;
     }
-
     const grid2 = (g) => {
       return produce(g, (gridCopy) => {
-        generation += 1;
-
         for (let i = 0; i < numRows; i++) {
           for (let k = 0; k < numCols; k++) {
             let neighbors = 0;
@@ -155,8 +152,7 @@ const GameOfLife = () => {
     playSpeed(e);
   };
 
-
-  let sample = []
+  let sample = [];
   const sampleConfigs = (event) => {
     switch (event) {
       case "1":
@@ -179,7 +175,6 @@ const GameOfLife = () => {
         sample = gliderGun;
         setGrid(sample);
     }
-
   };
 
   const sampleConfig = (e) => {
