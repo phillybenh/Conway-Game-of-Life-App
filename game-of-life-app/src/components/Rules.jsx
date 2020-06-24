@@ -45,9 +45,9 @@ const Rules = () => {
                   <li>
                     Clicking individual grid squares to select your live cells
                   </li>
-                  <li>Clicking the random seed button</li>
+                  <li>Clicking the "Random Seed" button</li>
                   <li>
-                    Selecting one of the pre-defined patters from the 'Patterns'
+                    Selecting one of the pre-defined patterns from the "Patterns"
                     dropdown
                   </li>
                 </ul>
