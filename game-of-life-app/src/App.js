@@ -12,10 +12,14 @@ import Footer from './components/Footer';
 function App() {
   return (
     <div className="App">
-      <Header />
-      <Background />
-      <Rules />
-      <GameOfLife />
+      <div className="mainContainer">
+        <Header />
+        <section className="mainComponents">
+          <Background />
+          <Rules />
+          <GameOfLife />
+        </section>
+      </div>
       <Footer />
     </div>
   );
