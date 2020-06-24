@@ -29,9 +29,10 @@ const operations = [
   [-1, 0],
 ];
 
-function arrayClone(arr) {
-  return arr.map((array) => array.slice());
-}
+// not currently using, may come back to this
+// function arrayClone(arr) {
+//   return arr.map((array) => array.slice());
+// }
 
 const GameOfLife = () => {
   const [numRows, setNumRows] = useState(30);
@@ -54,14 +55,6 @@ const GameOfLife = () => {
   // const [generation, setGeneration] = useState(0);
   // const [speed, setSpeed] = useState(500);
 
-  // function ot generate an empty grid
-  const generateEmptyGrid = () => {
-    const rows = [];
-    for (let i = 0; i < numRows; i++) {
-      rows.push(Array.from(Array(numCols), () => 0));
-    }
-    return rows;
-  };
   const runSimulation = useCallback(() => {
     if (!playingRef.current) {
       return;
@@ -122,7 +115,13 @@ const GameOfLife = () => {
     if (playing) {
       playStop();
     }
-    setGrid(generateEmptyGrid());
+    setGrid(() => {
+      const rows = [];
+      for (let i = 0; i < numRows; i++) {
+        rows.push(Array.from(Array(numCols), () => 0));
+      }
+      return rows;
+    });
     generation = 0;
   };
 
@@ -144,8 +143,6 @@ const GameOfLife = () => {
         speed = 1000;
       // console.log("speed3", speed);
     }
-    // setGrid(generateEmptyGrid());
-    // reset();
   };
 
   const changeSpeed = (e) => {
