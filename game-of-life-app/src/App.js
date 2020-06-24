@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 // import app components
 import Header from './components/Header'
-import GameOfLife from './components/Game'
+import GameOfLife from './components/game/Game'
 import Rules from './components/Rules';
 import Background from './components/Background';
 import Footer from './components/Footer';
@@ -12,10 +12,14 @@ import Footer from './components/Footer';
 function App() {
   return (
     <div className="App">
-      <Header />
-      <Background />
-      <Rules />
-      <GameOfLife />
+      <div className="mainContainer">
+        <Header />
+        <section className="mainComponents">
+          <Background />
+          <Rules />
+          <GameOfLife />
+        </section>
+      </div>
       <Footer />
     </div>
   );

@@ -1,13 +1,22 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
 
+// components
+import Grid from "./Grid";
+import Controls from "./Controls";
+import {
+  beehive,
+  blinker,
+  pulsarOsc,
+  spaceFleet,
+  gliderGun,
+} from "./SampleConfigs";
+
 // styles
-import { Button, Dropdown, DropdownButton } from "react-bootstrap";
 import "./Game.css";
 
-const numRows = 35;
-const numCols = 50;
 let generation = 0;
+let speed = 500;
 
 const operations = [
   [0, 1],
@@ -19,40 +28,20 @@ const operations = [
   [1, 0],
   [-1, 0],
 ];
-const Controls = (props) => {
-  return (
-    <div className="buttons">
-      <Button variant="primary" onClick={props.playStop}>
-        {props.playing ? "Stop" : "Start"}
-      </Button>
-      <Button variant="primary" onClick={props.randomSeed}>
-        Random Seed
-      </Button>
-      <Button variant="primary" onClick={props.reset}>
-        Reset
-      </Button>
-      <DropdownButton
-        title="Speed"
-        id="speed-menu"
-        onSelect={props.changeSpeed}
-      >
-        <Dropdown.Item eventKey="1">250ms</Dropdown.Item>
-        <Dropdown.Item eventKey="2">500ms</Dropdown.Item>
-        <Dropdown.Item eventKey="3">1000ms</Dropdown.Item>
-      </DropdownButton>
-    </div>
-  );
-};
+
+function arrayClone(arr) {
+  return arr.map((array) => array.slice());
+}
+
 const GameOfLife = () => {
-  // const [numRows, setNumRows] = useState(50);
-  // const [numCols, setNumCols] = useState(50);
+  const [numRows, setNumRows] = useState(30);
+  const [numCols, setNumCols] = useState(50);
 
   const [grid, setGrid] = useState(() => {
     const rows = [];
     for (let i = 0; i < numRows; i++) {
       rows.push(Array.from(Array(numCols), () => 0));
     }
-
     return rows;
   });
 
@@ -61,9 +50,9 @@ const GameOfLife = () => {
   const playingRef = useRef(playing);
   playingRef.current = playing;
 
+  // not using for now, may come back to later
   // const [generation, setGeneration] = useState(0);
-
-  const [speed, setSpeed] = useState(500);
+  // const [speed, setSpeed] = useState(500);
 
   // function ot generate an empty grid
   const generateEmptyGrid = () => {
@@ -71,14 +60,14 @@ const GameOfLife = () => {
     for (let i = 0; i < numRows; i++) {
       rows.push(Array.from(Array(numCols), () => 0));
     }
-
     return rows;
   };
   const runSimulation = useCallback(() => {
     if (!playingRef.current) {
       return;
     }
-    setGrid((g) => {
+
+    const grid2 = (g) => {
       return produce(g, (gridCopy) => {
         generation += 1;
 
@@ -101,10 +90,13 @@ const GameOfLife = () => {
           }
         }
       });
-    });
+    };
+    generation += 1;
+    setGrid(grid2);
     setTimeout(runSimulation, speed);
   }, []);
 
+  // function to play/stop the game
   const playStop = () => {
     setPlaying(!playing);
     if (!playing) {
@@ -112,6 +104,8 @@ const GameOfLife = () => {
       runSimulation();
     }
   };
+
+  // function to randomly seed the grid
   const randomSeed = () => {
     const rows = [];
     for (let i = 0; i < numRows; i++) {
@@ -126,66 +120,88 @@ const GameOfLife = () => {
   };
 
   const reset = () => {
+    console.log(grid);
+
+    if (playing) {
+      playStop();
+    }
     setGrid(generateEmptyGrid());
     generation = 0;
   };
 
-  const playSpeed = (speed) => {
-    switch (speed) {
+  const playSpeed = (event) => {
+    switch (event) {
       case "1":
-        setSpeed(250);
-        console.log("speed!")
+        // setSpeed(250);
+        speed = 250;
+        // console.log("speed1", speed);
         break;
       case "2":
-        setSpeed(500);
+        // setSpeed(500);
+        speed = 500;
+        // console.log("speed2", speed);
+
         break;
       default:
-        setSpeed(1000);
+        // setSpeed(1000);
+        speed = 1000;
+      // console.log("speed3", speed);
     }
-    setGrid(generateEmptyGrid());
-    reset();
+    // setGrid(generateEmptyGrid());
+    // reset();
   };
+
   const changeSpeed = (e) => {
     playSpeed(e);
   };
 
+
+  let sample = []
+  const sampleConfigs = (event) => {
+    switch (event) {
+      case "1":
+        sample = beehive;
+        setGrid(sample);
+        break;
+      case "2":
+        sample = blinker;
+        setGrid(sample);
+        break;
+      case "3":
+        sample = pulsarOsc;
+        setGrid(sample);
+        break;
+      case "4":
+        sample = spaceFleet;
+        setGrid(sample);
+        break;
+      default:
+        sample = gliderGun;
+        setGrid(sample);
+    }
+
+  };
+
+  const sampleConfig = (e) => {
+    sampleConfigs(e);
+  };
+
   return (
     <div className="center">
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${numCols}, 20px)`,
-          margin: "15px 0px",
-        }}
-      >
-        {grid.map((rows, i) =>
-          rows.map((col, k) => (
-            <div
-              key={`${i}-${k}`}
-              onClick={() => {
-                const newGrid = produce(grid, (gridCopy) => {
-                  gridCopy[i][k] = grid[i][k] ? 0 : 1;
-                });
-                setGrid(newGrid);
-              }}
-              style={{
-                width: 20,
-                height: 20,
-                backgroundColor: grid[i][k] ? "red" : undefined,
-                border: "solid 1px black",
-              }}
-            />
-          ))
-        )}
-      </div>
-      <h3>Generation: {generation}</h3>
-
+      <Grid
+        grid={grid}
+        setGrid={setGrid}
+        generation={generation}
+        numCols={numCols}
+        playing={playing}
+      />
       <Controls
         playStop={playStop}
         playing={playing}
         randomSeed={randomSeed}
         reset={reset}
         changeSpeed={changeSpeed}
+        sampleConfig={sampleConfig}
       />
     </div>
   );
