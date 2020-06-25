@@ -18,6 +18,7 @@ import "./Game.css";
 let generation = 0;
 let speed = 500;
 
+
 const operations = [
   [0, 1],
   [0, -1],
@@ -48,6 +49,7 @@ const GameOfLife = () => {
 
   const [playing, setPlaying] = useState(false);
 
+  // references the current value of playing, so we can actully stop/start the simulation 
   const playingRef = useRef(playing);
   playingRef.current = playing;
 
@@ -61,21 +63,23 @@ const GameOfLife = () => {
     }
     const grid2 = (g) => {
       return produce(g, (gridCopy) => {
+        // double for loop takes us thru every value in grid
         for (let i = 0; i < numRows; i++) {
-          for (let k = 0; k < numCols; k++) {
+          for (let j = 0; j < numCols; j++) {
             let neighbors = 0;
             operations.forEach(([x, y]) => {
-              const newI = i + x;
-              const newK = k + y;
-              if (newI >= 0 && newI < numRows && newK >= 0 && newK < numCols) {
-                neighbors += g[newI][newK];
+              // `(i + x + numRows) % numRows` wraps the edge neighbors around to the other side of the board
+              const neighborI = (i + x + numRows) % numRows;
+              const neighborJ = (j + y + numCols) % numCols;
+              if (neighborI >= 0 && neighborI < numRows && neighborJ >= 0 && neighborJ < numCols) {
+                neighbors += g[neighborI][neighborJ];
               }
             });
 
             if (neighbors < 2 || neighbors > 3) {
-              gridCopy[i][k] = 0;
-            } else if (g[i][k] === 0 && neighbors === 3) {
-              gridCopy[i][k] = 1;
+              gridCopy[i][j] = 0;
+            } else if (g[i][j] === 0 && neighbors === 3) {
+              gridCopy[i][j] = 1;
             }
           }
         }

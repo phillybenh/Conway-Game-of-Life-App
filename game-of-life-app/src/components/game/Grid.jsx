@@ -1,9 +1,13 @@
 import React, { useState, useCallback, useRef } from "react";
 import produce from "immer";
 
+
+// Grid displays the game on screen
+// also handles when a user clicks to select a cell
 const Grid = (props) => {
   return (
     <section className="gridcontainer">
+      {/* display generation count on screen */}
       <h3 className="gameHeadings">Generation: {props.generation}</h3>
       <div
         className="grid"
