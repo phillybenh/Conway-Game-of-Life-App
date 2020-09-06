@@ -24,4 +24,4 @@ For each time-step in the game, the rules are:
 ## This project
 This project is being completed as a build-week assignment for the computer science unit of the Lambda School web development curiculum. This specific requirements of the assignment can be viewed [here](https://github.com/phillybenh/CS-Build-Week-1). 
 
-The algorithm will be written in JavaScrit adn will be visualized in a React App. 
+The algorithm will be written in JavaScrit and will be visualized in a React App. 
